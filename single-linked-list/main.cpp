@@ -65,6 +65,7 @@ class SingleLinkedList {
         }
 
         BasicIterator& operator++() noexcept {
+           assert(node_ != nullptr);
            node_ = node_->next_node;
            return *this;    
         }
@@ -76,11 +77,13 @@ class SingleLinkedList {
         }
 
         [[nodiscard]] reference operator*() const noexcept {
+           assert(node_ != nullptr);
            return node_->value;
       
         }
 
         [[nodiscard]] pointer operator->() const noexcept {
+           assert(node_ != nullptr);
            return &(node_->value);        
         }
 
@@ -98,30 +101,19 @@ public:
         }      
     }
 
-    SingleLinkedList(const SingleLinkedList& other) {      
-            SingleLinkedList tmp_reverse;
-            SingleLinkedList tmp;
-            for (auto item : other) {
-                tmp_reverse.PushFront(item);
-            }
-            for (auto item : tmp_reverse) {
-                tmp.PushFront(item);
-            }
-            swap(tmp);
-    }
+    SingleLinkedList(const SingleLinkedList& other) {         
+        SingleLinkedList elem_copy;
+        Iterator head_it{ &elem_copy.head_  };
+ 
+        for (auto it = other.begin(); it != other.end(); ++it) {
+            head_it = elem_copy.InsertAfter(head_it, *it);
+        } 
+        swap(elem_copy);
+    }   
     
-     SingleLinkedList& operator=(const SingleLinkedList& rhs) {      
-        if (this != &rhs) {
-            SingleLinkedList tmp_reverse;
-            SingleLinkedList tmp;
-            for (auto item : rhs) {
-                tmp_reverse.PushFront(item);
-            }
-            for (auto item : tmp_reverse) {
-                tmp.PushFront(item);
-            }
-            swap(tmp);
-        }
+     SingleLinkedList& operator=(const SingleLinkedList& rhs) { 
+        SingleLinkedList tmp = rhs;
+        swap(tmp);
         return *this;
     }
     
@@ -201,6 +193,7 @@ public:
     }
     
     Iterator InsertAfter(ConstIterator pos, const Type& value) {
+        assert (pos.node_ != nullptr);
         auto new_node = new Node(value, pos.node_->next_node);
         pos.node_->next_node = new_node;
         ++size_;
@@ -209,13 +202,16 @@ public:
 
     void PopFront() noexcept {
         // Реализуйте метод самостоятельно
-        Node* node_to_delete = head_.next_node;
-        head_.next_node = head_.next_node->next_node;
-        delete node_to_delete;
-        --size_;
+        if (size_ != 0) {
+            Node* node_to_delete = head_.next_node;
+            head_.next_node = head_.next_node->next_node;
+            delete node_to_delete;
+            --size_;
+        }
     }
 
     Iterator EraseAfter(ConstIterator pos) noexcept {
+        assert(pos.node_ != nullptr);
         Node* node_to_delete = pos.node_->next_node;
         pos.node_->next_node = pos.node_->next_node->next_node;
         delete node_to_delete;
